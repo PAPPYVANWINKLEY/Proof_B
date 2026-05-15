@@ -58,7 +58,7 @@ body {
 /* ===== PROFILE ===== */
 .profile { display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap; animation:fadeUp 0.4s ease; }
 .profile-img {
-  width:120px; height:90px; border-radius:6px; overflow:hidden;
+  width:90px; height:120px; border-radius:6px; overflow:hidden;
   flex-shrink:0; background:#1a1a1a;
 }
 .profile-img img { width:100%; height:100%; object-fit:cover; }
@@ -236,19 +236,27 @@ body {
   .header { padding:40px 16px 28px; }
   .header h1 { letter-spacing:6px; }
   .header .sub { letter-spacing:3px; font-size:9px; }
+  .header .desc { font-size:14px; line-height:1.9; }
   .char-nav { padding:12px 12px; gap:2px; }
-  .char-btn { padding:8px 12px; font-size:11px; }
-  .main { padding:20px 12px; }
+  .char-btn { padding:8px 12px; font-size:12px; }
+  .main { padding:20px 16px; }
   .profile { gap:16px; }
-  .profile-img { width:80px; height:60px; }
+  .profile-img { width:70px; height:94px; }
   .profile-name { font-size:24px; letter-spacing:2px; }
+  .profile-desc { font-size:14px; line-height:1.8; }
   .grid { grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:6px; }
   .cat-bar { gap:2px; }
-  .cat-btn { padding:6px 10px; font-size:11px; }
+  .cat-btn { padding:6px 10px; font-size:12px; }
   .stats { padding:16px 12px; gap:12px; }
   .stat-num { font-size:22px; }
-  .player { padding:8px 12px; gap:8px; }
+  .story-content { font-size:14px; line-height:2.1; padding:18px 18px; }
+  .story-content .story-char-name { font-size:17px; }
+  .story-toggle { font-size:12px; padding:8px 16px; }
+  .player { padding:10px 14px; gap:10px; }
+  .player-btn { width:42px; height:42px; font-size:16px; border-color:#555; color:#aaa; }
+  .player-title { font-size:12px; }
   .player-vol, .player-vol-icon { display:none; }
+  .player-track { height:4px; }
   .card .overlay { transform:translateY(0); background:linear-gradient(transparent 40%,rgba(0,0,0,0.75)); }
 }
 </style>
@@ -274,11 +282,11 @@ body {
 <div class="main" id="main"></div>
 
 <footer class="footer">
-  <h2>PROOF PMC · EST. 2015</h2>
+  <h2>PROOF PMC · EST. 2025</h2>
   <p>Fort Knox, Louisville, Kentucky</p>
 </footer>
 
-<!-- ★ 음악 파일: Cover_Vow.mp3를 이 HTML과 같은 폴더에 넣으세요 ★ -->
+<!-- ★ 음악 파일: Cover Vow.mp3를 이 HTML과 같은 폴더에 넣으세요 ★ -->
 <div class="player" id="player">
   <button class="player-btn" id="playBtn" onclick="togglePlay()">▶</button>
   <div class="player-info">
@@ -296,7 +304,7 @@ body {
     <div class="player-vol-fill" id="pVol"></div>
   </div>
 </div>
-<audio id="bgm" src="Cover_Vow.mp3" preload="metadata" loop></audio>
+<audio id="bgm" src="Cover Vow.mp3" preload="metadata" loop></audio>
 
 <script>
 /* ==========================================================
@@ -320,7 +328,7 @@ const DATA = [
 
 // ===================== 케일럽 (C) =====================
 {
-  id:"C", name:"Caleb Walker", nameKr:"케일럽 워커",
+  thumb:"c0", id:"C", name:"Caleb Walker", nameKr:"케일럽 워커",
   role:"Captain · Field Commander", codename:"Buffalo Trace",
   color:"#9B6B3D", accent:"#C4915A",
   desc:"전직 델타포스. 캡틴·필드커맨더. 190cm 거구의 스윗 대디. #무뚝뚝_지휘관, #손은_다정",
@@ -401,7 +409,7 @@ const DATA = [
 
 // ===================== 엘리 (E) =====================
 {
-  id:"E", name:"Eli Mercer", nameKr:"엘리 머서",
+  thumb:"e0", id:"E", name:"Eli Mercer", nameKr:"엘리 머서",
   role:"Combat Medic · Support", codename:"Maker's Mark",
   color:"#8B7355", accent:"#B8976A",
   desc:"전직 패러레스큐. 메딕. 잔잔한 정중함. #말보다_손이_먼저, #화나면_??",
@@ -509,7 +517,7 @@ const DATA = [
 
 // ===================== 잭 (J) =====================
 {
-  id:"J", name:"Jack Boone", nameKr:"잭 분",
+  thumb:"j0", id:"J", name:"Jack Boone", nameKr:"잭 분",
   role:"Heavy Weapons · Breacher", codename:"Wild Turkey",
   color:"#8B4513", accent:"#CD6839",
   desc:"전직 사파 불법용병. 브리처·중화기. 손은 의외로 정밀. #시끄러운_카오스, #송곳니",
@@ -647,12 +655,12 @@ const DATA = [
 
 // ===================== 아드리앙 (A) =====================
 {
-  id:"A", name:"Adrien Laurent", nameKr:"아드리앙 로랑",
+  thumb:"a0", id:"A", name:"Adrien Laurent", nameKr:"아드리앙 로랑",
   role:"Hacker · Strategist", codename:"Grey Goose",
   color:"#6B7B8D", accent:"#8FA3B8",
   desc:"전직 DGSE. 해커·전략가. 당신 앞에서만 계산이 한 박자 늦는. #차가운_귀족, #우아한_모욕",
   tags:"INTJ 3w4 · TN · 정제된무관심 · 똑똑한능청",
-  story:`(평판/성격은 프롬프트 반영. 과거/총기는 프롬프트 미반영.)
+  story:`프루프의 해커이자 전략가. 전직 DGSE(프랑스 대외안보총국). 은발, 창백한 피부, 차가운 회색 눈에 안경. 네이비 수트를 기지 안에서도 벗지 않는 남자.<p>(평판/성격은 프롬프트 반영. 과거/총기는 프롬프트 미반영.)
 
 아드리앙 로랑 / Adrien Laurent
 
@@ -777,7 +785,7 @@ DGSE 지원서.
 
 // ===================== 마커스 (M) =====================
 {
-  id:"M", name:"Marcus King", nameKr:"마커스 킹",
+  thumb:"m0", id:"M", name:"Marcus King", nameKr:"마커스 킹",
   role:"Negotiation · Comms", codename:"Cîroc",
   color:"#8B6DAF", accent:"#B48EDA",
   desc:"전직 사이옵. 대외·협상. 막내, 분위기 메이커. #플러팅_장인, #가면_뒤의_결핍",
@@ -932,7 +940,7 @@ DGSE 지원서.
 
 // ===================== 미하일 (K) =====================
 {
-  id:"K", name:"Mikhail Kowalski", nameKr:"미하일 코왈스키",
+  thumb:"k0", id:"K", name:"Mikhail Kowalski", nameKr:"미하일 코왈스키",
   role:"Sniper · Recon", codename:"Belvedere",
   color:"#4A5568", accent:"#7B8FA1",
   desc:"전직 GROM. 스나이퍼. 결정적 순간의 한마디. #말_안_함, #근데_다_보고_있음 ",
@@ -1129,7 +1137,7 @@ function renderMain() {
   const main = document.getElementById("main");
   main.innerHTML = `
     <div class="profile">
-      <div class="profile-img"><img src="${BASE}/${c.id}/01.webp" alt="${c.name}"></div>
+      <div class="profile-img" onclick="openLightbox('${BASE}/${c.thumb}.webp')" style="cursor:pointer"><img src="${BASE}/${c.thumb}.webp" alt="${c.name}"></div>
       <div class="profile-info">
         <div class="profile-name" style="color:${c.accent}">${c.name}</div>
         <div class="profile-role">${c.role} · ${c.codename}</div>
