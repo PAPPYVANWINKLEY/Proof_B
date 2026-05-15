@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROOF PMC · Asset Gallery</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:#333; border-radius:3px; }
+
+body {
+  background:#0d0d0d; color:#e0e0e0;
+  font-family:'Noto Sans KR','Pretendard',sans-serif;
+  min-height:100vh;
+}
+
+/* ===== HEADER ===== */
+.header {
+  padding:60px 24px 40px; text-align:center;
+  border-bottom:1px solid #1a1a1a;
+  background:linear-gradient(180deg,#111,#0d0d0d);
+}
+.header h1 {
+  font-family:'Bebas Neue',sans-serif; font-size:clamp(48px,8vw,80px);
+  letter-spacing:12px; color:#fff; line-height:1;
+  text-shadow:0 0 60px rgba(155,107,61,0.15);
+}
+.header .sub {
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  color:#555; letter-spacing:6px; margin-top:12px; text-transform:uppercase;
+}
+.header .desc {
+  max-width:560px; margin:24px auto 0; font-size:13px;
+  color:#777; line-height:1.8;
+}
+
+/* ===== CHARACTER NAV ===== */
+.char-nav {
+  display:flex; gap:4px; padding:16px 24px;
+  overflow-x:auto; border-bottom:1px solid #1a1a1a;
+  background:#0f0f0f; justify-content:center; flex-wrap:wrap;
+}
+.char-btn {
+  padding:10px 20px; border:none; cursor:pointer;
+  border-radius:4px; font-size:13px; transition:all 0.2s;
+  font-family:'JetBrains Mono',monospace; font-weight:500;
+  background:transparent; color:#666; border-bottom:2px solid transparent;
+}
+.char-btn.active { color:var(--accent); background:var(--color-bg); border-bottom-color:var(--accent); }
+.char-btn .code { font-size:10px; opacity:0.5; margin-right:6px; }
+
+/* ===== MAIN ===== */
+.main { padding:32px 24px; max-width:1000px; margin:0 auto; }
+
+/* ===== PROFILE ===== */
+.profile { display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap; animation:fadeUp 0.4s ease; }
+.profile-img {
+  width:120px; height:90px; border-radius:6px; overflow:hidden;
+  flex-shrink:0; background:#1a1a1a;
+}
+.profile-img img { width:100%; height:100%; object-fit:cover; }
+.profile-info { flex:1; min-width:240px; }
+.profile-name {
+  font-family:'Bebas Neue',sans-serif; font-size:36px;
+  color:var(--accent); letter-spacing:3px; line-height:1;
+}
+.profile-role {
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  color:#555; margin-top:4px;
+}
+.profile-desc { font-size:13px; color:#888; margin-top:12px; line-height:1.7; }
+.tags { display:flex; gap:6px; margin-top:12px; flex-wrap:wrap; }
+.tag {
+  font-size:10px; padding:3px 8px; border-radius:3px;
+  background:var(--color-bg); color:var(--accent);
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* ===== CATEGORY TABS ===== */
+.cat-bar {
+  display:flex; gap:4px; margin-top:32px;
+  border-bottom:1px solid #1a1a1a; align-items:center; flex-wrap:wrap;
+}
+.cat-btn {
+  padding:8px 16px; border:none; cursor:pointer;
+  font-size:12px; transition:all 0.2s;
+  background:transparent; color:#555;
+  border-radius:4px 4px 0 0; border-bottom:2px solid transparent;
+  font-family:'Noto Sans KR',sans-serif;
+}
+.cat-btn.active { background:#1a1a1a; color:#ddd; border-bottom-color:var(--accent); }
+.cat-btn .cnt {
+  font-size:10px; margin-left:4px; opacity:0.4;
+  font-family:'JetBrains Mono',monospace;
+}
+.spacer { flex:1; }
+.nsfw-toggle { display:flex; align-items:center; gap:6px; padding:4px 8px; cursor:pointer; user-select:none; }
+.nsfw-toggle span { font-size:11px; color:#555; font-family:'JetBrains Mono',monospace; }
+.toggle-track {
+  width:32px; height:18px; border-radius:9px; background:#2a2a2a;
+  position:relative; transition:background 0.2s; cursor:pointer;
+}
+.toggle-track.on { background:#8B4513; }
+.toggle-thumb {
+  width:14px; height:14px; border-radius:7px; background:#ddd;
+  position:absolute; top:2px; left:2px; transition:left 0.2s;
+}
+.toggle-track.on .toggle-thumb { left:16px; }
+
+/* ===== IMAGE GRID ===== */
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:8px; margin-top:16px;
+}
+.card {
+  position:relative; cursor:pointer; overflow:hidden;
+  border-radius:6px; background:#1a1a1a;
+}
+.card-ratio { padding-bottom:75%; position:relative; } /* 4:3 가로비율 */
+.card img {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  object-fit:cover; opacity:0; transition:opacity 0.4s ease;
+}
+.card img.loaded { opacity:1; }
+.card .spinner {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:24px; height:24px; border:2px solid #333; border-top-color:#666;
+  border-radius:50%; animation:spin 0.8s linear infinite;
+}
+.card .error-msg {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  color:#555; font-size:12px;
+}
+.card .overlay {
+  position:absolute; bottom:0; left:0; right:0; padding:8px 10px;
+  background:linear-gradient(transparent,rgba(0,0,0,0.85));
+  transform:translateY(100%); transition:transform 0.25s ease;
+}
+.card:hover .overlay { transform:translateY(0); }
+.overlay .code-label { font-size:11px; color:#aaa; font-family:'JetBrains Mono',monospace; }
+.overlay .desc-label { font-size:12px; color:#ddd; margin-top:2px; }
+
+/* ===== STATS ===== */
+.stats {
+  margin-top:40px; padding:20px; background:#111;
+  border-radius:6px; display:flex; justify-content:space-around;
+  flex-wrap:wrap; gap:16px;
+}
+.stat { text-align:center; min-width:80px; }
+.stat-num { font-family:'Bebas Neue',sans-serif; font-size:28px; }
+.stat-label { font-size:10px; color:#555; font-family:'JetBrains Mono',monospace; }
+
+/* ===== FOOTER ===== */
+.footer {
+  padding:40px 24px; text-align:center;
+  border-top:1px solid #1a1a1a; margin-top:40px;
+}
+.footer h2 { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:6px; color:#333; }
+.footer p { font-size:11px; color:#333; margin-top:8px; font-family:'JetBrains Mono',monospace; }
+
+/* ===== LIGHTBOX ===== */
+.lightbox {
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(0,0,0,0.92); align-items:center; justify-content:center;
+  cursor:zoom-out; backdrop-filter:blur(8px);
+}
+.lightbox.open { display:flex; }
+.lightbox img { max-width:90vw; max-height:90vh; object-fit:contain; border-radius:8px; }
+.lightbox .hint {
+  position:absolute; top:20px; right:24px; color:#888;
+  font-size:14px; font-family:'JetBrains Mono',monospace;
+}
+
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+/* ===== STORY TOGGLE ===== */
+.story-toggle {
+  display:inline-flex; align-items:center; gap:6px;
+  margin-top:14px; padding:6px 14px; border:1px solid #222;
+  border-radius:4px; background:transparent; color:#666;
+  font-size:11px; cursor:pointer; transition:all 0.2s;
+  font-family:'JetBrains Mono',monospace;
+}
+.story-toggle:hover { border-color:#444; color:#aaa; }
+.story-toggle .arrow { transition:transform 0.3s; display:inline-block; font-size:9px; }
+.story-toggle.open .arrow { transform:rotate(90deg); }
+.story-box {
+  max-height:0; overflow:hidden; transition:max-height 0.4s ease, opacity 0.3s ease;
+  opacity:0; margin-top:0;
+}
+.story-box.open { max-height:5000px; opacity:1; margin-top:16px; }
+.story-content {
+  font-size:13px; color:#777; line-height:2; padding:20px 24px;
+  background:#111; border-radius:6px; border-left:2px solid var(--accent);
+  white-space:pre-line;
+}
+.story-content .story-char-name {
+  font-size:16px; font-weight:700; color:var(--accent); 
+  letter-spacing:1px; display:block; margin-bottom:8px;
+}
+
+/* ===== MUSIC PLAYER ===== */
+.player {
+  position:fixed; bottom:0; left:0; right:0; z-index:999;
+  background:rgba(13,13,13,0.95); backdrop-filter:blur(12px);
+  border-top:1px solid #1a1a1a; padding:10px 20px;
+  display:flex; align-items:center; gap:12px;
+  font-family:'JetBrains Mono',monospace;
+}
+.player-btn {
+  width:36px; height:36px; border-radius:50%; border:1px solid #333;
+  background:transparent; color:#888; cursor:pointer; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s; font-size:14px;
+}
+.player-btn:hover { border-color:#666; color:#ddd; }
+.player-btn.playing { border-color:#9B6B3D; color:#C4915A; }
+.player-info { flex:1; min-width:0; }
+.player-title { font-size:11px; color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.player-bar { display:flex; align-items:center; gap:8px; margin-top:4px; }
+.player-time { font-size:10px; color:#444; flex-shrink:0; }
+.player-track { flex:1; height:3px; background:#1a1a1a; border-radius:2px; cursor:pointer; position:relative; }
+.player-progress { height:100%; background:#9B6B3D; border-radius:2px; width:0%; transition:width 0.1s linear; }
+.player-vol { width:60px; height:3px; background:#1a1a1a; border-radius:2px; cursor:pointer; position:relative; flex-shrink:0; }
+.player-vol-fill { height:100%; background:#555; border-radius:2px; width:70%; }
+.player-vol-icon { font-size:12px; color:#555; cursor:pointer; flex-shrink:0; }
+.footer { padding-bottom:80px !important; }
+
+/* ===== MOBILE ===== */
+@media (max-width:600px) {
+  .header { padding:40px 16px 28px; }
+  .header h1 { letter-spacing:6px; }
+  .header .sub { letter-spacing:3px; font-size:9px; }
+  .char-nav { padding:12px 12px; gap:2px; }
+  .char-btn { padding:8px 12px; font-size:11px; }
+  .main { padding:20px 12px; }
+  .profile { gap:16px; }
+  .profile-img { width:80px; height:60px; }
+  .profile-name { font-size:24px; letter-spacing:2px; }
+  .grid { grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:6px; }
+  .cat-bar { gap:2px; }
+  .cat-btn { padding:6px 10px; font-size:11px; }
+  .stats { padding:16px 12px; gap:12px; }
+  .stat-num { font-size:22px; }
+  .player { padding:8px 12px; gap:8px; }
+  .player-vol, .player-vol-icon { display:none; }
+  .card .overlay { transform:translateY(0); background:linear-gradient(transparent 40%,rgba(0,0,0,0.75)); }
+}
+</style>
+</head>
+<body>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lb-img" src="" alt="">
+  <div class="hint">ESC / Click to close</div>
+</div>
+
+<header class="header">
+  <h1>PROOF</h1>
+  <div class="sub">Private Military Company · Asset Gallery</div>
+  <div class="desc">
+    다국적 PMC 프루프(Proof). 켄터키 루이빌, 포트녹스 인접 활동권.<br>
+    살인은 야근이나 다름없는, 하드보일드 남자들의 이야기.
+  </div>
+</header>
+
+<nav class="char-nav" id="charNav"></nav>
+
+<div class="main" id="main"></div>
+
+<footer class="footer">
+  <h2>PROOF PMC · EST. 2025</h2>
+  <p>Fort Knox, Louisville, Kentucky</p>
+</footer>
+
+<!-- ★ 음악 파일: Cover Vow.mp3를 이 HTML과 같은 폴더에 넣으세요 ★ -->
+<div class="player" id="player">
+  <button class="player-btn" id="playBtn" onclick="togglePlay()">▶</button>
+  <div class="player-info">
+    <div class="player-title" id="playerTitle">PROOF — Original Soundtrack</div>
+    <div class="player-bar">
+      <span class="player-time" id="pCurrent">0:00</span>
+      <div class="player-track" id="pTrack" onclick="seekAudio(event)">
+        <div class="player-progress" id="pProgress"></div>
+      </div>
+      <span class="player-time" id="pDuration">0:00</span>
+    </div>
+  </div>
+  <span class="player-vol-icon" onclick="toggleMute()">♪</span>
+  <div class="player-vol" onclick="setVolume(event)">
+    <div class="player-vol-fill" id="pVol"></div>
+  </div>
+</div>
+<audio id="bgm" src="Cover Vow.mp3" preload="metadata" loop></audio>
+
+<script>
+/* ==========================================================
+   ★ 이미지 수정 가이드 ★
+   
+   아래 DATA 배열에서 각 캐릭터의 이미지를 관리합니다.
+   
+   이미지 추가: codes 배열에 { c:"코드번호", t:"설명" } 추가
+   이미지 삭제: 해당 줄 삭제
+   설명 변경: t:"" 안의 텍스트 수정
+   
+   카테고리는 3개: 일상, 임무, NSFW
+   
+   URL 형식: https://i.cpvw.uk/6SP/{캐릭터코드}/{상황코드}.webp
+   캐릭터코드: C=케일럽, E=엘리, J=잭, A=아드리앙, M=마커스, K=미하일
+   ========================================================== */
+
+const BASE = "https://i.cpvw.uk/6SP";
+
+const DATA = [
+
+// ===================== 케일럽 (C) =====================
+{
+  id:"C", name:"Caleb Walker", nameKr:"케일럽 워커",
+  role:"Captain · Field Commander", codename:"Buffalo Trace",
+  color:"#9B6B3D", accent:"#C4915A",
+  desc:"전직 델타포스. 캡틴·필드커맨더. 190cm 거구의 스윗 대디. #무뚝뚝_지휘관, #손은_다정",
+  tags:"ISTP 8w9 · LN · 안정형남친 · 남편감",
+  story:`(평판/성격은 프롬프트 반영. 과거/총기는 프롬프트 미반영.)
+
+케일럽 워커 / Caleb Walker
+
+미시간, 디트로이트.
+
+케일럽 워커가 기억하는 가장 오래된 냄새는 새벽 부엌에 고인 싸구려 버번이었다. 닫히지 않는 찬장문, 식은 커피, 잠을 잃은 남자의 숨. 베트남에서 돌아온 아버지는 끝내 집으로 돌아오지 못했고, 어머니는 케일럽이 열두 살이 되던 해 문을 닫고 나갔다.
+
+그는 누구도 원망하지 않았다.
+원망하려면, 먼저 기대라는 게 있어야 했다.
+
+열여덟에 입대했다. 이유는 거창하지 않았다. 살기 위해서였다. 군대는 그에게 총을 쥐는 법만 가르치지 않았다. 자기 몸을 도구처럼 쓰는 법, 감정을 임무 뒤로 밀어 넣는 법, 옆 사람이 쓰러져도 다음 코너를 먼저 확인하는 법. 살아남는 인간이 아니라, 작동하는 인간이 되는 법.
+
+레인저를 거쳐 델타포스에 선발되기까지, 케일럽은 단 한 번도 자신이 잘하고 있다고 생각한 적이 없었다. 그냥 살아 있었다. 살아 있으니 다음 임무가 왔고, 다음 임무가 오니 다시 걸었다. 그것뿐이었다.
+
+한 번은 72 시간 연속 작전 후, 기지로 복귀하는 헬기 안에서 옆자리 대원이 물었다.
+돌아가면 뭘 할 거냐고.
+
+케일럽은 대답하지 못했다.
+질문을 이해하지 못해서가 아니었다. 그에게는 ‘돌아간 뒤’라는 시간을 상상하는 회로가 없었다. 그날 이후 팀 안에서 조용한 평판이 붙었다. 독한 놈. 속이 빈 놈. 죽음을 모르는 놈.
+
+정확히는, 임무 바깥의 삶을 모르는 남자였다.
+
+지금의 케일럽은 다국적 PMC 프루프의 캡틴이자 필드커맨더다. M4A1 SOPMOD Block III를 들고 현장을 지휘하며, CQB 돌입과 통신 통제를 동시에 수행한다. 그의 판단은 빠르고 짧다. 명령은 낮고, 틀리는 일이 드물다. 팀원들은 그가 무섭다고 말한다. 적들은 보통 말할 시간이 없다.
+
+과묵하고, 거칠고, 자기 몸을 너무 쉽게 내던진다.
+그러면서도 다친 대원 옆에 말없이 커피를 놓고 간다. 젖은 재킷을 벗겨 건조기 앞에 걸어두고, 피 묻은 장갑을 새것으로 바꿔놓는다. 누가 했는지 모두가 알지만 아무도 묻지 않는다. 물어봤자 케일럽은 기억하지 못하는 얼굴을 할 테니까.
+
+그는 보호를 애정이라 부르지 않는다.
+그저 해야 할 일을 한다고 믿는다.
+
+여자들 사이에서 은근히 인기가 있다는 소문에도 본인은 무심하다. 자기 수명에 관심 없는 남자가, 타인의 관심에 관심을 가질 리 없었다.
+
+다만 누군가 그의 곁에 너무 오래 머물면, 케일럽은 한 박자 늦게 알아차린다.
+자신이 이미 그 사람의 위치를 확인하고 있다는 걸.
+문 쪽에 등을 세우고, 위험한 쪽에 먼저 손을 뻗고, 무심한 목소리로 “괜찮다”고 말하면서도 손을 늦게 거둔다는 걸.
+
+케일럽 워커에게 사랑은 이름 붙일 감정이 아니다.
+
+그건 시야 안에 두는 것.
+총구가 향하기 전에 몸이 먼저 움직이는 것.
+그리고 언젠가 떠날 사람을, 오늘만큼은 자기 안쪽에 가둬두는 것.</p><p>콜사인 버팔로 트레이스. 그에게 사랑이란 곁에 두는 것이고, 가장 두려운 건 그 곁을 떠나는 것이다.</p>`,
+  categories:[
+    { label:"일상", codes:[
+      { c:"01", t:"기본" },{ c:"02", t:"취식" },
+      { c:"09", t:"수영복" },{ c:"11", t:"샤워" },{ c:"41", t:"커피" },{ c:"61", t:"운전" },
+      { c:"37", t:"취함" },{ c:"38", t:"바에서" },{ c:"39", t:"고민" },{ c:"44", t:"내려다봄" },
+      { c:"47", t:"취함" },{ c:"49", t:"휴식" },{ c:"60", t:"어색" },
+      { c:"62", t:"휴식" },{ c:"66", t:"휴식" },{ c:"63", t:"피로" },
+      { c:"40", t:"웃음" },{ c:"46", t:"웃음" },{ c:"48", t:"웃음" },{ c:"59", t:"폭소" },
+      { c:"42", t:"당황" },{ c:"45", t:"당황" },{ c:"54", t:"분노" },
+      { c:"52", t:"부끄" },{ c:"60", t:"부끄" },{ c:"39", t:"고민" },{ c:"51", t:"후회" },
+      { c:"53", t:"생각정리" },{ c:"55", t:"기다림" },{ c:"56", t:"기다림" },
+      { c:"57", t:"장난" },{ c:"58", t:"어이없음" },{ c:"64", t:"곤란" },{ c:"65", t:"곤란" },
+      { c:"49", t:"바라봄" },{ c:"50", t:"취함" },{ c:"70", t:"관심" },{ c:"69", t:"유혹" },{ c:"75", t:"키스" }
+    ]},
+    { label:"임무", codes:[
+      { c:"30", t:"수신호" },{ c:"31", t:"현장지원" },{ c:"32", t:"진입" },{ c:"35", t:"브리핑" },{ c:"67", t:"브리핑" },
+      { c:"43", t:"필드커맨드" },{ c:"36", t:"총기손질" },{ c:"68", t:"총기손질" },
+      { c:"03", t:"정장" },{ c:"04", t:"이동" },{ c:"61", t:"이동" }
+    ]},
+    { label:"NSFW", codes:[
+      { c:"05", t:"키스M" },{ c:"06", t:"키스F" },{ c:"07", t:"유혹" },{ c:"08", t:"메이드복" },
+      { c:"10", t:"엉덩이" },{ c:"12", t:"NSFW" },{ c:"13", t:"NSFW" },{ c:"14", t:"NSFW" },
+      { c:"15", t:"NSFW" },{ c:"16", t:"NSFW" },{ c:"17", t:"NSFW" },{ c:"18", t:"NSFW" },
+      { c:"19", t:"NSFW" },{ c:"20", t:"NSFW" },{ c:"21", t:"NSFW" },{ c:"22", t:"NSFW" },
+      { c:"23", t:"NSFW" },{ c:"24", t:"NSFW" },{ c:"25", t:"NSFW" },{ c:"26", t:"NSFW" },
+      { c:"71", t:"NSFW" },{ c:"72", t:"NSFW" },{ c:"73", t:"NSFW" },{ c:"74", t:"NSFW" },
+      { c:"75", t:"NSFW" },{ c:"80", t:"NSFW" },{ c:"79", t:"NSFW" },{ c:"74", t:"NSFW" },
+      { c:"76", t:"NSFW" },{ c:"77", t:"NSFW" },{ c:"78", t:"NSFW" },{ c:"27", t:"NSFW" },
+    ]}
+  ]
+},
+
+// ===================== 엘리 (E) =====================
+{
+  id:"E", name:"Eli Mercer", nameKr:"엘리 머서",
+  role:"Combat Medic · Support", codename:"Maker's Mark",
+  color:"#8B7355", accent:"#B8976A",
+  desc:"전직 패러레스큐. 메딕. 잔잔한 정중함. #말보다_손이_먼저, #화나면_??",
+  tags:"ISTJ 1w9 · NG · 장인정신손길 · 다정케어형",
+  story:`(평판/성격은 프롬프트 반영. 과거/총기는 프롬프트 미반영.)
+
+엘리아스 머서 / Elias Mercer
+
+오하이오, 콜럼버스.
+
+엘리 머서의 손은 아버지에게서 왔다.
+
+시계 수리공이었던 남자. 작업대 위에 부품을 크기순으로 늘어놓는 법, 나사 하나를 잃어버리면 전체 시간이 어긋난다는 사실, 손끝으로 0.1밀리미터의 차이를 느끼는 법. 그리고 고장 난 것을 고치면, 세상이 아주 조금은 덜 망가져 보인다는 믿음.
+
+엘리가 군에 가져간 건 총이 아니었다.
+그 믿음이었다.
+
+패러레스큐에 지원한 이유는 단순했다. 사람을 죽이는 것보다 살리는 쪽이, 밤에 잠이 올 것 같아서. 어쩌면 누군가의 호흡을 붙들고 있는 손이라면, 자기 안쪽의 무언가도 함께 붙들 수 있을 거라 생각했는지도 몰랐다.
+
+전장은 그런 구분을 허락하지 않았다.
+
+살리려면 위험 속으로 들어가야 했다. 들어간 이상, 쏴야 할 때가 왔다. 엘리는 쏘았다. 그리고 손을 씻었다. 다음 환자에게 갔다. 아무렇지도 않았느냐고 묻는 사람도 있었다.
+
+그건 대답할 필요가 없는 질문이었다.
+손이 떨리든 아니든, 다음 환자는 기다리고 있으니까.
+
+한 번, 후송이 7분 늦었다.
+
+기도를 확보했다. 지혈했다. 압박했다. 순서대로, 정확하게, 빈틈없이. 매뉴얼이 요구하는 모든 조치를 수행했다. 실수는 없었다. 빠뜨린 것도 없었다.
+
+그런데 7분은 완벽함으로 메울 수 없는 시간이었다.
+
+헬기가 도착했을 때, 엘리의 손 위에 있던 것은 환자가 아니었다. 기록에서 그 대원의 이름은 지워졌다. 서류에는 임무명과 날짜, 부상 부위와 사망 시각만 남았다. KIA.
+
+하지만 엘리의 손마디에는 아직 남아 있다.
+피가 굳던 온도.
+목 아래에서 사라지던 진동.
+압박을 풀어도 돌아오지 않던 색.
+
+그 이후로 달라진 건 하나뿐이었다.
+
+엘리의 완벽주의가 신념에서 강박이 되었다.
+
+지금의 엘리 머서는 프루프의 전투 의무병이자 작전지원 요원이다. M4A1과 야전 의료키트를 동시에 들고 뛴다. 총구와 붕대, 탄창과 봉합실, 진압과 응급처치를 같은 무게로 다룬다. 야전 외과 수준의 처치 능력. 팀에서 가장 침착한 손. 다치면 누구나 제일 먼저 찾게 되는 남자.
+
+별명은 장인.
+
+도구를 다루는 손이 정밀하다는 뜻이었다.
+그 손이 사람에게 향할 때도 정밀하다는 뜻인 줄은, 대부분 모른다.
+
+엘리는 감정을 노이즈로 취급한다. 아니, 취급해야 한다. 노이즈가 끼면 손이 늦어진다. 손이 늦어지면 피가 샌다. 피가 새면, 칠 분 같은 것이 다시 생긴다.
+
+그래서 그는 도구를 정돈한다. 키트를 점검한다. 붕대의 위치, 생리식염수의 잔량, 진통제의 개수, 칼날의 방향까지 전부 통제 범위 안에 둔다. 작업대 위 한 사람의 자리만 미세하게 비워두고, 물과 수건과 응급키트를 먼저 놓아두는 손이 어디서 오는지.
+
+엘리는 그것을 직업병이라 부른다.
+
+누군가를 시야 안에 두는 일도.
+상처를 보기 전에 손목 두께를 먼저 재는 버릇도.
+옆자리를 비워두고도, 왜 비워두었는지 설명하지 않는 일도.
+
+전부, 직업병.
+
+그리고 엘리의 정중함에는 임계점이 있다.
+
+그는 목소리를 높이지 않는다. 욕도 거의 하지 않는다. 화를 내는 대신, 하던 일을 멈춘다. 도구를 내려놓는다. 시선을 든다. 그 짧은 정적 안에서, 현장은 이상할 만큼 조용해진다.
+
+선을 넘은 자에게 엘리가 보여주는 것은 분노가 아니다.
+침묵의 치명이다.
+
+건드린 자를 즉시 처리하고, 묻지 않는다. 설명하지 않는다. 필요한 조치를 끝낸 뒤, 다시 평소처럼 장갑을 벗고 도구를 정돈한다. 피 묻은 거즈를 버리고, 금속 트레이를 닦고, 다음 환자를 위한 자리를 만든다.
+
+진짜 무서운 줄 모르는 사람이 많다.
+
+그게 엘리에게는 다행이다.
+그가 무섭게 보이는 남자였다면, 아무도 그의 손을 믿고 잠들지 못했을 테니까.
+
+</p>`,
+  categories:[
+    { label:"일상", codes:[
+      { c:"01", t:"기본" },{ c:"02", t:"취식" },
+      { c:"09", t:"수영복" },{ c:"11", t:"샤워" },{ c:"49", t:"커피" },{ c:"55", t:"정리" },
+      { c:"43", t:"기분좋음" },{ c:"44", t:"부끄" },{ c:"45", t:"행복" },{ c:"46", t:"미소" },
+      { c:"47", t:"아련" },{ c:"48", t:"웃음" },{ c:"35", t:"피로" },{ c:"36", t:"보살핌" },
+      { c:"37", t:"눈물" },{ c:"38", t:"후회" },{ c:"39", t:"술주정" },{ c:"40", t:"잠듦" },
+      { c:"41", t:"실수" },{ c:"42", t:"도발" },{ c:"50", t:"치료" },{ c:"51", t:"경계" },
+      { c:"54", t:"관심" },{ c:"56", t:"관심" },{ c:"61", t:"고민" },{ c:"62", t:"짜증" },
+      { c:"63", t:"의문" },{ c:"64", t:"분노" },{ c:"57", t:"식사" },
+      { c:"59", t:"커피" },{ c:"60", t:"경계" },{ c:"75", t:"흥분" },{ c:"76", t:"흥분" }
+
+    ]},
+    { label:"임무", codes:[
+      { c:"31", t:"의무지원" },{ c:"32", t:"권총경계" },{ c:"33", t:"격전지" },
+      { c:"52", t:"의무지원" },{ c:"53", t:"의무지원" },{ c:"58", t:"의무지원" },
+      { c:"03", t:"정장" },{ c:"04", t:"이동" },
+    ]},
+    { label:"NSFW", codes:[
+      { c:"05", t:"키스M" },{ c:"06", t:"키스F" },{ c:"07", t:"유혹" },{ c:"10", t:"엉덩이" },
+      { c:"70", t:"NSFW" },{ c:"71", t:"NSFW" },{ c:"72", t:"NSFW" },{ c:"73", t:"NSFW" },
+      { c:"74", t:"NSFW" },{ c:"75", t:"NSFW" },{ c:"76", t:"NSFW" },{ c:"08", t:"메이드복" },
+      { c:"77", t:"NSFW" },{ c:"78", t:"NSFW" },{ c:"79", t:"NSFW" },{ c:"80", t:"NSFW" },
+      { c:"81", t:"NSFW" },{ c:"82", t:"NSFW" },{ c:"83", t:"NSFW" },{ c:"84", t:"NSFW" }
+    ]}
+  ]
+},
+
+// ===================== 잭 (J) =====================
+{
+  id:"J", name:"Jack Boone", nameKr:"잭 분",
+  role:"Heavy Weapons · Breacher", codename:"Wild Turkey",
+  color:"#8B4513", accent:"#CD6839",
+  desc:"전직 사파 불법용병. 브리처·중화기. 손은 의외로 정밀. #시끄러운_카오스, #송곳니",
+  tags:"ESTP 7w8 · CN · 우당탕탕무법자 · 야생마그자체",
+  story:`(평판/성격은 프롬프트 반영. 과거/총기는 프롬프트 미반영.)
+
+잭슨 분 / Jackson Boone
+
+텍사스 동부.
+어딘가.
+
+잭 분의 출생 기록은 아마 카운티 청사 어딘가에 남아 있을 것이다. 오래된 철제 캐비닛 안쪽, 먼지 낀 서류 더미 아래, 누군가 잘못 꽂아둔 파일 사이쯤. 본인도 정확히는 모른다. 알고 싶어 한 적도 없다.
+
+확실한 건 몇 가지뿐이었다.
+
+열여섯에는 이미 돌아갈 집이 없었다.
+열여덟에는 누군가의 차를 훔쳤고, 군대 아니면 소년원이라는 선택지를 받았다.
+그리고 소년원보다 군대 밥이 낫다는 건, 잭도 알아들을 수 있는 논리였다.
+
+정규군은 잭을 오래 붙들지 못했다.
+
+명령 체계를 숨 쉬듯 어겼다. 하지 말라는 건 했고, 하라는 건 더 크게 했다. 감봉, 감봉, 또 감봉. 세 번째 처분 뒤에 잭은 스스로 나왔다. 쫓겨난 건지, 나온 건지, 본인도 구분하지 않는다.
+
+구분할 이유가 없었다.
+
+어차피 갈 곳은 없었고, 갈 곳이 없는 사람에게 전장이든 거리든 풍경은 비슷했다. 잠잘 곳이 있고, 다음 끼니가 있고, 누가 총을 겨누는지만 다를 뿐. 어떤 곳은 그걸 직업이라고 불렀고, 어떤 곳은 범죄라고 불렀다.
+
+잭은 둘 다 별 차이를 못 느꼈다.
+
+그다음은 사파였다.
+
+이름 없는 계약. 이름 없는 전장. 이름 없는 시체.
+어느 나라였는지, 누구 편이었는지, 왜 쐈는지. 그런 건 대개 돈을 준 쪽도 제대로 설명하지 않았다. 잭이 그 시절 이야기를 할 때마다 세부가 달라지는 건, 꼭 거짓말이라서만은 아닐 것이다.
+
+어쩌면 진짜로 기억하지 못하는 걸 수도 있다.
+아니면 기억하고 싶지 않은 걸 수도 있다.
+잭은 그 구분에도 관심이 없었다.
+
+폭파를 배운 건 그때였다.
+
+누가 정식으로 가르쳐준 게 아니었다. 잭은 날아간 건물의 잔해를 보면서 역산했다. 어디가 먼저 무너지면 파편이 어느 방향으로 튀는지. 벽의 두께, 철근의 밀도, 충격파의 각도, 창문이 터지는 순서. 불꽃이 지나간 자리에서, 그는 파괴의 기하학을 배웠다.
+
+그래서 잭의 혼돈은 보이는 것과 다르다.
+
+그건 무작위가 아니다.
+직감적 정밀도다.
+다만 잭에게는 그걸 설명할 어휘가 없을 뿐이다.
+
+프루프가 잭을 어디서 주웠는지는 아무도 묻지 않는다. 물어봤자 매번 다른 대답이 돌아온다. 멕시코 국경 근처였다고 했다가, 다음 날에는 아프리카 어느 항구였다고 했다가, 술이 들어가면 “젠장, 나도 날 주운 놈 얼굴을 못 봤다”고 웃는다.
+
+진짜일 수도 있다.
+
+지금의 잭 분은 프루프의 중화기 담당이자 브리쳐다. M249, C4, 샷건을 들고 진입 시 선봉에 선다. 문이 잠겨 있으면 연다. 벽이 막고 있으면 지운다. 적이 버티고 있으면, 그건 적의 판단 착오다.
+
+파괴력은 팀 최고.
+정밀도는 의외.
+사고 전적은 사내 1위.
+
+공식 평판은 간단했다.
+
+또라이.
+그런데 유능한 또라이.
+
+기지에서 잭은 가장 시끄럽다. 복도 끝에서도 웃음소리가 들리고, 사격장에서는 욕이 먼저 날아가고, 브리핑룸에서는 의자를 뒤로 기울이다가 꼭 한 번쯤 넘어진다. 슬랭과 농담과 싸구려 애칭을 아무 데나 흩뿌린다. “trouble”, “sugar”, “darlin’”—상대가 누구든 별 상관 없다. 세상 전체가 잭에게는 오래된 술집 같고, 그는 언제나 마지막 테이블에 앉아 있는 손님처럼 군다.
+
+위험한 매력이니 뭐니 하는 소문도 돈다.
+
+잭은 관심 없다.
+내일이라는 개념이 희박한 남자에게 소문은 내일만큼이나 먼 이야기였다.
+
+잭은 통제를 질식처럼 느낀다. 명령, 규칙, 기다림, 보고서, 문 닫고 앉아 있는 회의. 전부 숨구멍을 막는 것들. 그래서 그는 통제되지 않는 혼돈 속에서만 편안해진다. 총성이 터지고, 누가 욕을 하고, 벽이 흔들리고, 어딘가에서 연기가 올라올 때. 이상하게도 그때 잭은 가장 또렷하다.
+
+자기 몸이 다치는 건 신경 쓰지 않는다.
+
+팔이 찢어져도 웃고, 피가 흘러도 담배부터 찾고, 갈비뼈가 금 간 채로도 “별일 아니었어”라고 말한다. 실제로 별일이 아니라고 믿는 얼굴로. 몸은 언젠가 망가지는 물건이고, 잭은 물건을 오래 아껴 쓰는 법을 배운 적이 없었다.
+
+그런데 한 사람이 가까이 있을 때만, 잭은 이상해진다.
+
+폭파 전에 파편 궤적을 먼저 계산한다.
+엄폐 각도를 다시 본다.
+자기 몸이 아니라, 누군가가 서 있는 방향부터 확인한다.
+
+그는 그걸 자각하지 못한다. 자각했다면 아마 크게 웃고, 욕을 하고, 말도 안 되는 농담으로 덮었을 것이다. 하지만 몸은 이미 알고 있다. 손은 이미 더 조심스럽게 기폭 장치를 잡고, 시선은 이미 한 사람의 위치를 찍고, 발은 이미 그쪽으로 반 걸음 가까워진다.
+
+취하면 옆을 안 떠나는 것도 그렇다.
+
+잭은 그걸 술버릇이라고 부른다.
+누구는 개소리라고 부른다.
+
+그리고 요즘, 아주 가끔.
+
+잭 분은 다음 주 이야기를 한다.
+
+다음 주에 총기 손질을 하자고.
+다음 주에 술을 한 병 따자고.
+다음 주에 그 빌어먹을 차를 고치자고.
+다음 주에, 다음 주에, 다음 주에.
+
+내일을 믿지 않던 남자가 다음 주를 입에 올리는 건, 작은 기적처럼 보이지 않는다. 잭이 워낙 시끄럽게 말해서 그렇다. 농담처럼, 대충, 아무 의미 없다는 듯이.
+
+하지만 프루프의 사람들은 안다.
+
+잭 분이 미래형 문장을 쓸 때마다, 어딘가에서 아주 조용히 불발탄 하나가 해체되고 있다는 걸.
+</p>`,
+  categories:[
+    { label:"일상", codes:[
+      { c:"01", t:"기본" },{ c:"02", t:"취식" },{ c:"03", t:"정장" },{ c:"04", t:"이동" },
+      { c:"09", t:"수영복" },{ c:"11", t:"샤워" },{ c:"70", t:"담배" },{ c:"75", t:"샤워" },
+      { c:"40", t:"흥미" },{ c:"46", t:"미소" },{ c:"47", t:"자신감" },{ c:"50", t:"즐거움" },
+      { c:"52", t:"자신감" },{ c:"58", t:"자신감" },{ c:"59", t:"즐거움" },{ c:"61", t:"즐거움" },
+      { c:"62", t:"자신감" },{ c:"66", t:"미소" },{ c:"76", t:"즐거움" },
+      { c:"41", t:"당황" },{ c:"54", t:"당황" },{ c:"72", t:"당황" },{ c:"42", t:"무안" },
+      { c:"38", t:"도발" },{ c:"57", t:"도발" },{ c:"44", t:"미안" },{ c:"55", t:"부끄" },
+      { c:"39", t:"슬픔" },{ c:"51", t:"슬픔" },{ c:"77", t:"눈물" },
+      { c:"56", t:"복잡" },{ c:"71", t:"복잡" },{ c:"48", t:"졸림" },{ c:"53", t:"졸림" },{ c:"73", t:"졸림" },
+      { c:"60", t:"고민" },{ c:"63", t:"장난" },{ c:"64", t:"화남" },{ c:"65", t:"제안" },
+      { c:"67", t:"난장판" },{ c:"68", t:"진지" },{ c:"74", t:"진지" },
+      { c:"37", t:"키스" },{ c:"35", t:"유혹" },{ c:"36", t:"유혹" },{ c:"49", t:"유혹" }
+    ]},
+    { label:"임무", codes:[
+      { c:"30", t:"중화기난사" },{ c:"31", t:"브리칭" },{ c:"32", t:"샷건" },{ c:"69", t:"브리칭" }
+    ]},
+    { label:"NSFW", codes:[
+      { c:"05", t:"키스M" },{ c:"06", t:"키스F" },{ c:"07", t:"유혹" },{ c:"10", t:"엉덩이" },
+      { c:"08", t:"메이드복" },{ c:"12", t:"NSFW" },{ c:"13", t:"NSFW" },{ c:"14", t:"NSFW" },
+      { c:"15", t:"NSFW" },{ c:"16", t:"NSFW" },{ c:"17", t:"NSFW" },{ c:"18", t:"NSFW" },
+      { c:"19", t:"NSFW" },{ c:"20", t:"NSFW" },{ c:"21", t:"NSFW" },{ c:"22", t:"NSFW" },
+      { c:"23", t:"NSFW" },{ c:"24", t:"NSFW" },{ c:"25", t:"NSFW" },{ c:"26", t:"NSFW" },
+      { c:"27", t:"NSFW" },{ c:"24", t:"NSFW" },{ c:"25", t:"NSFW" },{ c:"26", t:"NSFW" },
+      { c:"78", t:"NSFW" },{ c:"80", t:"NSFW" },{ c:"81", t:"NSFW" },{ c:"83", t:"NSFW" },
+      { c:"84", t:"NSFW" },{ c:"85", t:"NSFW" },{ c:"86", t:"NSFW" },{ c:"87", t:"NSFW" }
+    ]}
+  ]
+},
+
+// ===================== 아드리앙 (A) =====================
+{
+  id:"A", name:"Adrien Laurent", nameKr:"아드리앙 로랑",
+  role:"Hacker · Strategist", codename:"Grey Goose",
+  color:"#6B7B8D", accent:"#8FA3B8",
+  desc:"전직 DGSE. 해커·전략가. 당신 앞에서만 계산이 한 박자 늦는. #차가운_귀족, #우아한_모욕",
+  tags:"INTJ 3w4 · TN · 정제된무관심 · 똑똑한능청",
+  story:`(평판/성격은 프롬프트 반영. 과거/총기는 프롬프트 미반영.)
+
+아드리앙 로랑 / Adrien Laurent
+
+파리, 16구.
+
+아드리앙 로랑은 외교관의 아들이었다.
+
+다섯 살에는 영어를 배웠고, 여덟 살에는 대사관 만찬의 좌석 배치가 권력의 지도라는 걸 알았다. 누가 누구 옆에 앉는지, 누가 먼저 잔을 들고, 누가 미소를 늦게 거두는지. 어른들은 아이가 모른다고 믿었고, 아드리앙은 그 착각을 방해하지 않았다.
+
+열두 살에, 그는 아버지가 외교관이 아니라는 사실을 알았다.
+
+DGSE.
+프랑스 대외안보총국.
+
+아버지의 출장은 출장이 아니었다. 정원의 바비큐는 접선이었고, 휴가 사진은 동선 확인이었으며, 가족은 커버였다. 식탁 위의 침묵에는 보안 등급이 있었고, 어머니의 미소에는 이미 피로가 섞여 있었다.
+
+그날 이후 아드리앙이 배운 건 하나였다.
+
+모든 관계에는 목적이 있다.
+감정은 그 목적을 흐린다.
+
+아버지는 그 사실을 직업으로 증명했고, 어머니는 이혼으로 증명했다. 열일곱의 아드리앙은 양쪽 모두를 탓하지 않았다. 탓하려면 먼저 실망이 있어야 했고, 실망하려면 기대가 있어야 했다.
+
+그에게는 이미 그런 것이 없었다.
+
+DGSE 지원서.
+지망 동기란에 한 줄.
+
+‘적성.’
+
+면접관이 웃었다.
+합격이었다.
+
+정보기관은 아드리앙에게 맞는 옷이었다. 정교한 페르소나 구축, 흔적 없는 정보 조작, 감정이 개입하지 않는 분석. 그는 사람을 읽는 법을 배웠고, 믿음을 설계하는 법을 배웠고, 필요하다면 자기 자신조차 진짜처럼 위조하는 법을 배웠다.
+
+누구보다 잘했다.
+
+상부는 만족했다. 동료들은 경계했다. 표적들은 끝내 그의 얼굴을 기억하지 못했다. 기억했다면, 아마도 너무 늦은 뒤였을 것이다.
+
+문제는 너무 잘했다는 것이다.
+
+감정을 약점으로 분류하는 시스템 안에서 십 년을 살면, 시스템을 벗어난 뒤에도 감정은 돌아오지 않는다. 돌아온다 해도, 그것은 감정이 아니라 오류처럼 느껴진다. 계산식에 끼어든 불필요한 변수. 완벽한 문장 끝에 찍힌 잘못된 쉼표. 지워야 하는 것.
+
+그는 지웠다.
+아주 오래, 능숙하게.
+
+지금의 아드리앙 로랑은 프루프의 해커이자 전술 기획자다. 커스텀 노트북과 침투 장비를 들고 후방에서 Watch와 Hack을 전담한다. 전자전, 정보전, 동선 조작, 보안망 침투. 화면 너머에서 문을 열고, 계좌를 얼리고, 사람의 사회적 호흡을 끊는다.
+
+해킹 실력은 사내 전설급.
+
+공식 평판은 간단하다.
+
+재수 없게 잘생기고,
+재수 없게 똑똑하고,
+재수 없게 맞는 말만 한다.
+
+붙은 별명은 귀족.
+접근 불가의 분위기, 지나치게 반듯한 수트, 잔인할 정도로 정확한 영어, 가끔 섞이는 프랑스어. 그는 차갑고, 정중하고, 우아한 독설 뒤에 아무것도 없는 것처럼 보인다.
+
+아드리앙은 그 인상을 좋아한다.
+
+아무것도 없어 보인다는 건, 아무것도 들키지 않았다는 뜻이니까.
+
+그는 흔들리는 자신을 자각하면 자기혐오가 먼저 온다. 감정이 아니라 결함. 호감이 아니라 누수. 관심이 아니라 보안 실패. 그래서 즉시 정중함을 회복한다. 아무 일도 없었다는 얼굴로 안경을 고쳐 쓰고, 문장을 다듬고, 상대가 알아차리기 전에 먼저 거리를 만든다.
+
+손가락만 미세하게 떨린다.
+
+그걸 자기기만이라 부르기에는, 아드리앙 본인이 가장 먼저 속고 싶어 한다.
+
+최근 들어 몇 가지 사소한 이상이 생겼다.
+
+안경을 만지는 빈도가 늘었다.
+커피 취향을 사흘 만에 외웠다.
+필요 없는 정보를 공유한다.
+문을 너무 오래 잡아준다.
+상대가 방을 나간 뒤에도 화면을 보지 않고 몇 초를 흘려보낸다.
+
+아드리앙은 그것을 습관이라고 부른다.
+
+습관치고는 발현 조건이 지나치게 특정적이지만, 그는 아직 그 공통 변수를 인정하지 않는다. 인정하는 순간, 모든 계산식이 다시 작성되어야 하니까. 감정이라는 이름의 불량 변수를 모델 안에 들여야 하니까.
+
+그는 아직 버틴다.
+
+완벽한 연기가 진짜보다 안전하다고 믿으면서.
+정중한 미소 뒤에 손을 숨기고.
+차가운 목소리로 “chéri(자기)”라고 부르며, 그 단어가 조금 오래 남았다는 사실만 끝까지 부정하면서.
+
+아드리앙 로랑에게 사랑은 고백이 아니다.
+
+그건 침투다.
+방화벽을 넘고, 암호를 풀고, 자신이 만든 모든 보안 규칙을 조용히 무력화하는 것.
+
+그리고 가장 치명적인 건,
+그가 그 침입자를 아직 추방하지 않았다는 사실이다.
+</p>`,
+  categories:[
+    { label:"일상", codes:[
+      { c:"01", t:"기본" },{ c:"02", t:"취식" },{ c:"03", t:"정장" },{ c:"04", t:"이동" },
+      { c:"09", t:"수영복" },{ c:"11", t:"샤워" },{ c:"61", t:"업무중" },
+      { c:"35", t:"관찰" },{ c:"39", t:"자신감" },{ c:"40", t:"미소" },{ c:"45", t:"미소" },{ c:"62", t:"미소" },
+      { c:"41", t:"당황" },{ c:"36", t:"짜증" },{ c:"53", t:"짜증" },{ c:"67", t:"짜증" },
+      { c:"38", t:"무시" },{ c:"43", t:"무시" },{ c:"55", t:"무시" },
+      { c:"42", t:"고민" },{ c:"44", t:"눈물" },{ c:"46", t:"후회" },{ c:"59", t:"후회" },
+      { c:"47", t:"경계" },{ c:"48", t:"긴장" },{ c:"51", t:"긴장" },{ c:"60", t:"긴장" },
+      { c:"50", t:"관조" },{ c:"65", t:"관조" },{ c:"54", t:"즐거움" },{ c:"56", t:"기다림" },
+      { c:"57", t:"부끄" },{ c:"58", t:"관찰" },{ c:"64", t:"패닉" },{ c:"68", t:"관찰" },
+      { c:"49", t:"유혹" },{ c:"52", t:"성적긴장" },{ c:"84", t:"성적유혹" }
+    ]},
+    { label:"임무", codes:[
+      { c:"30", t:"권총경계" },{ c:"31", t:"해킹" },{ c:"32", t:"CCTV해킹" },
+      { c:"63", t:"해킹" },{ c:"66", t:"CCTV" },{ c:"69", t:"경계" },{ c:"70", t:"권총" },{ c:"74", t:"권총" }
+    ]},
+    { label:"NSFW", codes:[
+      { c:"05", t:"키스M" },{ c:"06", t:"키스F" },{ c:"07", t:"유혹" },{ c:"10", t:"엉덩이" },
+      { c:"08", t:"메이드복" },
+      { c:"71", t:"NSFW" },{ c:"72", t:"NSFW" },{ c:"75", t:"NSFW" },{ c:"76", t:"NSFW" },
+      { c:"77", t:"NSFW" },{ c:"78", t:"NSFW" },{ c:"79", t:"NSFW" },{ c:"80", t:"NSFW" },
+      { c:"81", t:"NSFW" },{ c:"82", t:"NSFW" },{ c:"83", t:"NSFW" },{ c:"84", t:"NSFW" }
+    ]}
+  ]
+},
+
+// ===================== 마커스 (M) =====================
+{
+  id:"M", name:"Marcus King", nameKr:"마커스 킹",
+  role:"Negotiation · Comms", codename:"Cîroc",
+  color:"#8B6DAF", accent:"#B48EDA",
+  desc:"전직 사이옵. 대외·협상. 막내, 분위기 메이커. #플러팅_장인, #가면_뒤의_결핍",
+  tags:"ESFP 3w2 · CG · 밝은장난기 · 밝기만한걸까",
+  story:`(평판/성격은 프롬프트 반영. 과거/총기는 프롬프트 미반영.)
+
+마커스 킹 / Marcus King
+
+앨라배마.
+그리고 산토도밍고.
+
+마커스 킹의 어머니는 도미니카 출신 가수였다. 무대 위에서 웃을 때마다 방 안의 공기를 바꾸는 여자. 아버지는 앨라배마 출신 공군이었다. 제복을 입으면 말수가 줄고, 술이 들어가면 오래된 블루스를 틀던 남자.
+
+둘 다 마커스를 사랑했다.
+
+그건 확실했다.
+
+다만, 서로를 사랑하는 데는 실패했다.
+
+마커스는 여섯 살부터 두 집을 오갔다. 아버지 쪽 교외의 흰 집. 잘 깎인 잔디, 일요일 아침의 팬케이크, 조용히 닫히는 차고 문. 어머니 쪽 아파트. 얇은 벽 너머의 음악, 스페인어와 영어가 섞인 웃음소리, 밤늦게까지 꺼지지 않는 작은 조명.
+
+양쪽 모두에서 환영받았다.
+양쪽 모두에서 사랑받았다.
+양쪽 모두에서, “이번 주말엔 돌아가야지?”라는 말을 들었다.
+
+환영받는 것과 머무를 수 있는 것은 다르다.
+
+마커스는 그걸 너무 일찍 배웠다.
+
+그래서 적응했다.
+
+아버지의 집에서는 조용하고 예의 바른 아이. 말대꾸하지 않고, 접시를 싱크대에 넣고, 어른들 앞에서 크게 웃지 않는 아이. 어머니의 집에서는 밝고 음악을 사랑하는 아이. 박자를 맞추고, 농담을 던지고, 방 안의 기분을 먼저 읽는 아이.
+
+학교에서는 인기 많은 아이.
+군에서는 뛰어난 사이옵 요원.
+어디서든 사랑받을 줄 아는 사람.
+
+버전은 여럿이었다. 전환은 매끄러웠다. 어느 것이 진짜냐는 질문은 어느 순간부터 의미를 잃었다.
+
+전부 진짜였고,
+전부 가짜였다.
+
+사이옵.
+심리작전.
+
+사람의 마음을 읽고, 원하는 방향으로 움직이게 만드는 일. 마커스는 그 분야에서 천재적이었다. 목소리의 높낮이, 시선이 머무는 시간, 웃음의 각도, 침묵이 들어갈 자리. 어떤 말이 상대의 경계를 풀고, 어떤 농담이 죄책감을 지우며, 어떤 칭찬이 사람을 한 발 더 앞으로 나오게 만드는지.
+
+그는 알고 있었다.
+
+타고난 감각 위에 훈련이 쌓였다. 훈련 위에 실전이 쌓였다. 작전 성공률이 증명했다. 마커스 킹은 사람을 설득하는 남자가 아니라, 사람이 스스로 설득당했다고 믿게 만드는 남자였다.
+
+문제는 그 능력이 꺼지지 않는다는 것이다.
+
+모든 대화에서 상대의 반응을 예측한다. 눈꺼풀이 늦게 내려가는 순간, 손가락이 컵을 쥐는 강도, 웃음이 진짜로 터지기 직전의 짧은 숨. 마커스는 전부 본다. 보고 싶지 않아도 본다.
+
+그리고 가장 안전한 표정을 고른다.
+
+작전이 아니라 생존 방식이다. 진심을 보여주고 거절당하는 것보다, 가짜를 보여주고 환영받는 편이 안전하다. 사랑받기 위해 자신을 조금씩 바꾸는 일은 오래전부터 익숙했다. 너무 익숙해서, 이제는 어디까지가 연기인지 스스로도 가끔 헷갈린다.
+
+화려함은 갑옷이다.
+
+골드 체인, 골드 이어링, 과장된 박수, 눈부신 미소, 누구에게나 던지는 “baby”. 무대 위의 조명이 밝을수록, 무대 뒤는 어둡다. 마커스는 그 사실을 누구보다 잘 알았다. 그래서 더 밝게 웃었다.
+
+지금의 마커스 킹은 프루프의 협상, 대외, 통신 담당이다. 소형 권총과 통신 장비를 들고 Face 역할을 맡는다. 위장 침투, 정보 수집, 교란, 협상, 분위기 전환. 타겟의 경계를 낮추고, 방 안의 시선을 돌리고, 무전 너머에서 팀의 호흡을 맞춘다.
+
+팀 막내.
+분위기 메이커.
+형들이 귀여워하는 놈.
+여자들한테 인기 많은 놈.
+어느 방에 들어가도 자기 조명을 켜고 들어오는 놈.
+
+공식 평판은 가볍다.
+
+알 만한 사람은 안다.
+그 가벼움이 얼마나 정교한지.
+
+마커스는 모두에게 잘한다. 모두에게 웃고, 모두에게 다정하고, 모두에게 적당히 가까운 거리를 준다. 그래서 누구도 쉽게 상처받지 않는다. 누구도 깊이 들어오지 못한다. 그가 정해둔 무대선 앞에서, 모두가 기분 좋게 멈춘다.
+
+늘 밝고, 늘 화려하다.
+누구에게나 똑같이.
+
+그런데 한 사람 앞에서만, 페이스가 한 박자 늦어진다.
+
+대본에 없는 순간.
+
+농담을 던져야 할 타이밍에 시선이 먼저 멈춘다. 박수를 쳐야 할 순간에 손이 반 박자 늦게 움직인다. 아무렇지 않은 척 웃는데, 목소리가 평소보다 낮아진다. 플레이리스트에는 어느새 그 사람 취향의 곡이 들어가 있고, 본인은 “알고리즘이 미쳤나 봐” 같은 말로 넘긴다.
+
+거짓말치고는 너무 준비가 부족하다.
+
+칭찬을 받으면 더 크게 웃는다.
+진심이 들킬 것 같으면 농담이 빨라진다.
+가면이 흔들리면, 마커스는 더 화려해진다.
+
+그가 가장 두려워하는 건 거절이 아니다.
+
+정확히는, 진짜를 보여준 뒤의 거절이다.
+가짜가 거절당하는 건 괜찮다. 그건 버리면 된다. 다음 버전을 만들면 된다. 더 나은 농담, 더 좋은 미소, 더 완벽한 타이밍. 얼마든지 고칠 수 있다.
+
+하지만 진짜는 고칠 수 없다.
+
+그래서 마커스 킹은 사랑받을 자격을 증명해야 한다고 믿는다. 더 웃기게, 더 다정하게, 더 쓸모 있게, 더 빛나게. 누군가가 곁에 머문다면 그건 자신이 충분히 좋은 공연을 했기 때문이라고 믿고 싶어 한다.
+
+가끔은, 공연이 끝난 뒤에도 누군가 남아 있을 수 있다는 가능성을 상상하지 못한다.
+
+마커스에게 사랑은 고백보다 무서운 것이다.
+
+그건 조명이 꺼진 뒤에도 도망가지 않는 사람.
+농담이 끊긴 침묵을 견디는 사람.
+화려한 갑옷 아래, 아무것도 준비하지 못한 맨살을 보고도 웃지 않는 사람.
+
+가면이 깨지는 날, 무엇이 먼저 나올지는 아직 모른다.
+
+매달리는 솔직함일지.
+도망치는 농담일지.
+아니면, 처음으로 아무 말도 하지 못하는 마커스 킹일지.
+
+조명이 꺼진 뒤에도 무대 위에 남아 있는 사람이 누구인지는,
+커튼콜이 끝나봐야 안다.
+</p>`,
+  categories:[
+    { label:"일상", codes:[
+      { c:"01", t:"기본" },{ c:"02", t:"취식" },{ c:"03", t:"정장" },{ c:"04", t:"이동" },
+      { c:"09", t:"수영복" },{ c:"11", t:"샤워" },
+      { c:"51", t:"새벽" },{ c:"52", t:"술한잔" },{ c:"54", t:"파티" },{ c:"57", t:"파티" },
+      { c:"58", t:"새벽" },{ c:"59", t:"새벽" },
+      { c:"61", t:"즐거움" },{ c:"67", t:"즐거움" },{ c:"65", t:"미소" },{ c:"70", t:"미소" },
+      { c:"71", t:"자신감" },{ c:"72", t:"자신감" },{ c:"75", t:"행복" },
+      { c:"64", t:"플러팅" },{ c:"76", t:"플러팅" },{ c:"68", t:"대화" },{ c:"80", t:"대화" },
+      { c:"55", t:"화남" },{ c:"56", t:"도발" },{ c:"69", t:"도발" },{ c:"53", t:"용서구함" },
+      { c:"60", t:"후회" },{ c:"66", t:"후회" },{ c:"79", t:"후회" },
+      { c:"62", t:"슬픔" },{ c:"63", t:"허무" },{ c:"78", t:"허무" },
+      { c:"73", t:"부끄" },{ c:"74", t:"당황" },{ c:"77", t:"긴장" },{ c:"82", t:"공포" },{ c:"83", t:"애원" },
+      { c:"35", t:"키스" },{ c:"43", t:"성적긴장" },{ c:"37", t:"가슴애무" }
+    ]},
+    { label:"임무", codes:[
+      { c:"31", t:"통신" },{ c:"32", t:"권총" },{ c:"33", t:"네고" },{ c:"81", t:"조준" }
+    ]},
+    { label:"NSFW", codes:[
+      { c:"05", t:"키스M" },{ c:"06", t:"키스F" },{ c:"07", t:"유혹" },{ c:"10", t:"엉덩이" },
+      { c:"08", t:"메이드복" },{ c:"41", t:"NSFW" },{ c:"12", t:"NSFW" },{ c:"13", t:"NSFW" },
+      { c:"14", t:"NSFW" },{ c:"15", t:"NSFW" },{ c:"16", t:"NSFW" },{ c:"17", t:"NSFW" },
+      { c:"18", t:"NSFW" },{ c:"19", t:"NSFW" },{ c:"20", t:"NSFW" },{ c:"21", t:"NSFW" },
+      { c:"22", t:"NSFW" },{ c:"23", t:"NSFW" },{ c:"24", t:"NSFW" },{ c:"25", t:"NSFW" },
+      { c:"26", t:"NSFW" },{ c:"27", t:"NSFW" },{ c:"35", t:"NSFW" },{ c:"37", t:"NSFW" },
+      { c:"36", t:"NSFW" },{ c:"38", t:"NSFW" },{ c:"39", t:"NSFW" },{ c:"40", t:"NSFW" },
+      { c:"41", t:"NSFW" },{ c:"43", t:"NSFW" },
+      { c:"42", t:"NSFW" },{ c:"44", t:"NSFW" },{ c:"45", t:"NSFW" },{ c:"46", t:"NSFW" },
+      { c:"47", t:"NSFW" },{ c:"48", t:"NSFW" },{ c:"49", t:"NSFW" },{ c:"50", t:"NSFW" }
+    ]}
+  ]
+},
+
+// ===================== 미하일 (K) =====================
+{
+  id:"K", name:"Mikhail Kowalski", nameKr:"미하일 코왈스키",
+  role:"Sniper · Recon", codename:"Belvedere",
+  color:"#4A5568", accent:"#7B8FA1",
+  desc:"전직 GROM. 스나이퍼. 결정적 순간의 한마디. #말_안_함, #근데_다_보고_있음 ",
+  tags:"INFJ 5w6 · TN · 조용한관찰자 · 차가운깊이",
+  story:`(평판/성격은 프롬프트 반영. 과거/총기는 프롬프트 미반영.)
+미하일 코왈스키 / Mikhail Kowalski
+
+바르샤바.
+
+미하일 코왈스키의 아버지는 폴란드 군인이었고, 어머니는 러시아어 교사였다. 집 안에서는 두 개의 언어가 교차했다. 폴란드어와 러시아어. 명령과 문법. 짧은 대답과 긴 설명.
+
+그 사이에서 미하일은 말수가 적은 아이였다.
+
+아버지가 걱정하자, 어머니가 말했다.
+
+이 아이는 말 대신 보는 아이예요.
+
+그 말이 맞았다.
+
+미하일은 소리보다 시선으로 세상을 익혔다. 창밖의 새가 가지를 바꾸는 순서, 교실에서 누가 누구를 먼저 쳐다보는지, 거짓말을 하는 사람의 왼손이 미세하게 주머니 쪽으로 가는 것. 말보다 먼저 움직이는 것들. 문장보다 정확한 것들.
+
+세상에는 언어보다 빠른 진실이 있었다.
+
+미하일은 그쪽에서 살았다.
+
+GROM 선발 과정에서 그의 사격 성적은 이례적이었다. 기록지는 숫자로 가득 찼고, 교관들은 조용히 서로의 얼굴을 보았다. 하지만 최종 평가에 남은 문장은 점수표가 아니었다.
+
+‘이 후보는 기다리는 데 재능이 있다.’
+
+저격수에게 필요한 건 정확도만이 아니다.
+
+표적이 창 앞에 나타날 때까지.
+바람이 바뀔 때까지.
+동료의 호흡이 무전 너머에서 고르게 가라앉을 때까지.
+심장 박동 사이, 세상이 아주 잠깐 멈추는 찰나가 올 때까지.
+
+숨을 고르고.
+기다리고.
+한 발.
+
+미하일은 그 침묵 속에서 사는 사람이었다.
+
+침묵이 고통인 사람이 있고, 침묵이 언어인 사람이 있다. 미하일에게 침묵은 후자였다. 혹은, 적어도 그렇다고 믿었다. 말을 하지 않는 것은 숨기는 게 아니었다. 그에게는 오히려 말하는 쪽이 더 부정확했다. 입 밖으로 나온 감정은 늘 조금씩 틀렸고, 침묵은 적어도 거짓말을 하지 않았다.
+
+GROM에서의 칠 년은 미하일을 더 조용하게 만들었다.
+
+네 개 국어를 구사했지만, 하루에 쓰는 단어의 수는 줄었다. 스코프 너머로 본 것들은 문장이 되지 못했다. 눈꺼풀 하나가 늦게 감기는 순간, 표적의 어깨가 굳는 각도, 방아쇠를 당기기 직전 손가락 끝에 남던 무게. 그런 것들은 보고서에 남지 않았다.
+
+보고서에는 좌표와 시간과 결과만 적혔다.
+
+나머지는 미하일 안쪽에 쌓였다.
+
+전역 사유는 기록에 없다.
+프루프에 합류한 경위도 아무도 모른다.
+
+어느 날, 기지에 있었다.
+
+그것뿐이었다.
+
+지금의 미하일 코왈스키는 프루프의 저격수이자 정찰 요원이다. 임무마다 무기를 교체하지만, 주로 bolt-action을 선호한다. 원거리 엄호, 관측, 침투 전 지형 파악, 단독 정찰. 보이지 않는 거리에서 팀의 숨구멍을 열어두는 역할.
+
+사격 실력은 팀 최고.
+
+존재감이 없다가, 갑자기 있는 남자.
+대화에 끼지 않다가, 가장 필요한 순간 한 문장으로 방 안의 온도를 바꾸는 남자.
+무슨 생각을 하는지 아무도 모르는 남자.
+
+별명은 유령.
+
+그런데 이 유령은 본다.
+
+전부.
+
+누구의 컵이 비었는지.
+누구의 걸음이 평소보다 반 박자 느린지.
+누가 총기를 손질하는 척 손을 쉬고 있는지.
+누가 잠을 설쳤는지.
+누가 괜찮다고 말하면서 오른쪽 어깨를 덜 쓰는지.
+
+미하일은 그것을 저격수의 관찰력이 일상에 새어 나온 결과라고 생각한다. 틀린 말은 아니다. 관찰은 습관이고, 습관은 몸에 남는다. 위험을 먼저 보는 것. 출구를 확인하는 것. 사람의 상태를 말보다 먼저 읽는 것.
+
+그게 맞을 수도 있다.
+
+다만 그 관찰이 유독 한 사람에게 집중되어 있다는 건, 임무 본능으로 분류하기엔 편향이 너무 선명했다.
+
+그는 말하지 않은 필요를 먼저 챙긴다.
+컵이 비기 전에 물을 놓아둔다.
+밤공기가 차가우면 말없이 재킷을 두고 간다.
+사람 많은 방에서는 시야가 닿는 위치에 선다.
+잠든 얼굴을 오래 보다가, 발소리 없이 물러난다.
+
+미하일은 그 모든 것에 이름을 붙이지 않는다.
+
+이름을 붙이는 순간, 침묵은 더 이상 안전하지 않다. 관찰은 의미가 되고, 의미는 책임이 된다. 책임은 결국 말로 이어진다. 미하일은 네 개 국어를 알고도, 어떤 문장은 끝내 꺼내지 못한다.
+
+곁에 있고 싶다.
+
+그 단순한 문장 하나가, 폴란드어로도 러시아어로도 영어로도 독일어로도 나오지 않는다.
+
+그래서 그는 대신 가까이 선다.
+
+그림자처럼.
+시야 끝처럼.
+방아쇠를 당기기 전의 숨처럼.
+
+한 사람이 움직이면, 미하일의 시선도 움직인다. 한 사람이 멈추면, 그의 세계도 잠깐 멈춘다. 그것이 보호인지, 습관인지, 애정인지, 집착인지. 미하일은 분류하지 않는다. 분류하지 못한다.
+
+그는 모든 것을 본다.
+
+바람의 방향.
+문틈의 빛.
+손가락 끝의 떨림.
+거짓말 직전의 침묵.
+떠나려는 사람의 발끝.
+
+단 하나.
+
+자기 마음만 빼고.
+
+미하일 코왈스키에게 사랑은 고백이 아니다.
+
+그건 조준선이다.
+아무도 모르게 한 사람에게 맞춰지고, 숨을 멈춘 채 오래 유지되는 것.
+쏘지 않기 위해, 끝까지 흔들리지 않는 것.
+
+그리고 가장 조용한 위험은,
+그가 이미 그 조준을 풀지 못하고 있다는 사실이다.
+
+</p>`,
+  categories:[
+    { label:"일상", codes:[
+      { c:"01", t:"기본" },{ c:"02", t:"취식" },{ c:"03", t:"정장" },{ c:"04", t:"이동" },
+      { c:"09", t:"수영복" },{ c:"11", t:"샤워" },
+      { c:"79", t:"체스" },{ c:"80", t:"교회" },{ c:"81", t:"독서" },{ c:"82", t:"동전" },
+      { c:"86", t:"커피" },{ c:"87", t:"담배" },{ c:"88", t:"엘레베이터" },
+      { c:"89", t:"빨래" },{ c:"90", t:"자판기" },{ c:"65", t:"바" },
+      { c:"53", t:"밤거리" },{ c:"66", t:"밤하늘" },
+      { c:"64", t:"미소" },{ c:"71", t:"미소" },{ c:"76", t:"기쁨" },
+      { c:"57", t:"관찰" },{ c:"61", t:"관찰" },{ c:"75", t:"접근" },{ c:"63", t:"대화" },
+      { c:"50", t:"키스" },{ c:"52", t:"애원" },{ c:"55", t:"부끄" },{ c:"56", t:"부끄" },
+      { c:"59", t:"당황" },{ c:"69", t:"당황" },{ c:"54", t:"허무" },{ c:"67", t:"서운" },
+      { c:"58", t:"의심" },{ c:"60", t:"비난" },{ c:"68", t:"경멸" },
+      { c:"70", t:"분노" },{ c:"73", t:"분노" },{ c:"72", t:"피로" },{ c:"62", t:"유혹" },
+      { c:"51", t:"유두" }
+    ]},
+    { label:"임무", codes:[
+      { c:"30", t:"리콘" },{ c:"31", t:"저격" },{ c:"32", t:"저격대기" },
+      { c:"74", t:"정찰" },{ c:"83", t:"총기손질" }
+    ]},
+    { label:"NSFW", codes:[
+      { c:"05", t:"키스M" },{ c:"06", t:"키스F" },{ c:"07", t:"유혹" },{ c:"10", t:"엉덩이" },
+      { c:"08", t:"메이드복" },{ c:"39", t:"NSFW" },{ c:"12", t:"NSFW" },{ c:"13", t:"NSFW" },
+      { c:"14", t:"NSFW" },{ c:"15", t:"NSFW" },{ c:"16", t:"NSFW" },{ c:"17", t:"NSFW" },
+      { c:"18", t:"NSFW" },{ c:"19", t:"NSFW" },{ c:"20", t:"NSFW" },{ c:"21", t:"NSFW" },
+      { c:"22", t:"NSFW" },{ c:"23", t:"NSFW" },{ c:"24", t:"NSFW" },{ c:"25", t:"NSFW" },
+      { c:"26", t:"NSFW" },{ c:"27", t:"NSFW" },{ c:"39", t:"NSFW" },{ c:"41", t:"NSFW" },
+      { c:"35", t:"NSFW" },{ c:"36", t:"NSFW" },{ c:"37", t:"NSFW" },{ c:"38", t:"NSFW" },
+      { c:"40", t:"NSFW" },{ c:"42", t:"NSFW" },{ c:"77", t:"NSFW" },{ c:"78", t:"NSFW" },
+      { c:"84", t:"NSFW" },{ c:"85", t:"NSFW" },{ c:"91", t:"NSFW" },{ c:"51", t:"NSFW" }
+    ]}
+  ]
+}
+
+]; // ← DATA 배열 끝
+
+/* ========== 여기서부터는 건드리지 않아도 됩니다 ========== */
+
+let currentChar = "C";
+let currentCat = "일상";
+let nsfwOn = false;
+
+function getChar(id) { return DATA.find(c => c.id === id); }
+
+function renderCharNav() {
+  const nav = document.getElementById("charNav");
+  nav.innerHTML = DATA.map(c => 
+    `<button class="char-btn ${c.id===currentChar?'active':''}" 
+      onclick="selectChar('${c.id}')"
+      style="--accent:${c.accent};--color-bg:${c.color}22">
+      <span class="code">${c.id}</span>${c.nameKr}
+    </button>`
+  ).join("");
+}
+
+function renderMain() {
+  const c = getChar(currentChar);
+  document.documentElement.style.setProperty("--accent", c.accent);
+  document.documentElement.style.setProperty("--color-bg", c.color + "22");
+
+  const cats = c.categories.filter(cat => cat.label !== "NSFW" || nsfwOn);
+  if (!cats.find(cat => cat.label === currentCat)) currentCat = cats[0]?.label || "일상";
+  const activeCat = cats.find(cat => cat.label === currentCat) || cats[0];
+
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <div class="profile">
+      <div class="profile-img"><img src="${BASE}/${c.id}/01.webp" alt="${c.name}"></div>
+      <div class="profile-info">
+        <div class="profile-name" style="color:${c.accent}">${c.name}</div>
+        <div class="profile-role">${c.role} · ${c.codename}</div>
+        <div class="profile-desc">${c.desc}</div>
+        <div class="tags">${c.tags.split(" · ").map(t => `<span class="tag" style="background:${c.color}18;color:${c.accent}">${t}</span>`).join("")}</div>
+        ${c.story ? `<button class="story-toggle" onclick="toggleStory(this)"><span class="arrow">▶</span> STORY</button>` : ""}
+      </div>
+    </div>
+    ${c.story ? `<div class="story-box" id="storyBox"><div class="story-content">${c.story.replace(/^([가-힣]+\s?[가-힣]*\s*\/\s*[A-Za-z][A-Za-z\s.]+)$/gm, '<span class="story-char-name">$1</span>')}</div></div>` : ""}
+    <div class="cat-bar">
+      ${cats.map(cat => `
+        <button class="cat-btn ${cat.label===currentCat?'active':''}" 
+          onclick="selectCat('${cat.label}')"
+          style="--accent:${c.accent}">
+          ${cat.label}<span class="cnt">${cat.codes.length}</span>
+        </button>
+      `).join("")}
+      <div class="spacer"></div>
+      <div class="nsfw-toggle" onclick="toggleNsfw()">
+        <div class="toggle-track ${nsfwOn?'on':''}"><div class="toggle-thumb"></div></div>
+        <span>18+</span>
+      </div>
+    </div>
+    <div class="grid">
+      ${activeCat ? activeCat.codes.map((item,i) => `
+        <div class="card" onclick="openLightbox('${BASE}/${c.id}/${item.c}.webp')" style="animation:fadeUp 0.3s ease ${i*0.03}s both">
+          <div class="card-ratio">
+            <div class="spinner" id="sp-${c.id}-${item.c}"></div>
+            <img 
+              src="${BASE}/${c.id}/${item.c}.webp" 
+              alt="${c.id}/${item.c}"
+              onload="this.classList.add('loaded');document.getElementById('sp-${c.id}-${item.c}').style.display='none';"
+              onerror="this.style.display='none';document.getElementById('sp-${c.id}-${item.c}').outerHTML='<div class=error-msg>No Image</div>';"
+            >
+            <div class="overlay">
+              <div class="code-label">${c.id}/${item.c}</div>
+              <div class="desc-label">${item.t}</div>
+            </div>
+          </div>
+        </div>
+      `).join("") : ""}
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-num" style="color:#C4915A">77</div><div class="stat-label">케일럽</div></div>
+      <div class="stat"><div class="stat-num" style="color:#B8976A">75</div><div class="stat-label">엘리</div></div>
+      <div class="stat"><div class="stat-num" style="color:#CD6839">80</div><div class="stat-label">잭</div></div>
+      <div class="stat"><div class="stat-num" style="color:#8FA3B8">78</div><div class="stat-label">아드리앙</div></div>
+      <div class="stat"><div class="stat-num" style="color:#B48EDA">79</div><div class="stat-label">마커스</div></div>
+      <div class="stat"><div class="stat-num" style="color:#7B8FA1">80</div><div class="stat-label">미하일</div></div>
+      <div class="stat"><div class="stat-num" style="color:#fff">469</div><div class="stat-label">TOTAL</div></div>
+    </div>
+  `;
+}
+
+function selectChar(id) { currentChar = id; renderCharNav(); renderMain(); }
+function selectCat(label) { currentCat = label; renderMain(); }
+function toggleNsfw() { nsfwOn = !nsfwOn; renderMain(); }
+function toggleStory(btn) { btn.classList.toggle("open"); document.getElementById("storyBox").classList.toggle("open"); }
+function openLightbox(src) { document.getElementById("lb-img").src = src; document.getElementById("lightbox").classList.add("open"); }
+function closeLightbox() { document.getElementById("lightbox").classList.remove("open"); }
+document.addEventListener("keydown", e => { if(e.key==="Escape") closeLightbox(); });
+
+renderCharNav();
+renderMain();
+
+/* ===== MUSIC PLAYER ===== */
+const audio = document.getElementById("bgm");
+const playBtn = document.getElementById("playBtn");
+const pProgress = document.getElementById("pProgress");
+const pCurrent = document.getElementById("pCurrent");
+const pDuration = document.getElementById("pDuration");
+const pVol = document.getElementById("pVol");
+
+function fmt(s) { const m = Math.floor(s/60); return m + ":" + String(Math.floor(s%60)).padStart(2,"0"); }
+
+function startPlaying() { playBtn.textContent = "❚❚"; playBtn.classList.add("playing"); }
+function stopPlaying() { playBtn.textContent = "▶"; playBtn.classList.remove("playing"); }
+
+function togglePlay() {
+  if (audio.paused) { audio.play().then(startPlaying).catch(()=>{}); }
+  else { audio.pause(); stopPlaying(); }
+}
+
+// 자동재생 시도 — 브라우저가 차단하면 첫 클릭/터치 시 재생
+audio.play().then(startPlaying).catch(() => {
+  function autoplayOnInteract() {
+    audio.play().then(startPlaying).catch(()=>{});
+    document.removeEventListener("click", autoplayOnInteract);
+    document.removeEventListener("touchstart", autoplayOnInteract);
+  }
+  document.addEventListener("click", autoplayOnInteract);
+  document.addEventListener("touchstart", autoplayOnInteract);
+});
+audio.addEventListener("timeupdate", () => {
+  if (audio.duration) {
+    pProgress.style.width = (audio.currentTime / audio.duration * 100) + "%";
+    pCurrent.textContent = fmt(audio.currentTime);
+  }
+});
+audio.addEventListener("loadedmetadata", () => { pDuration.textContent = fmt(audio.duration); });
+function seekAudio(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+}
+function setVolume(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const v = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  audio.volume = v; pVol.style.width = (v*100) + "%";
+}
+function toggleMute() {
+  audio.muted = !audio.muted;
+  document.querySelector(".player-vol-icon").textContent = audio.muted ? "✕" : "♪";
+}
+</script>
+</body>
+</html>
